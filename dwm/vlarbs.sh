@@ -41,7 +41,7 @@ preinstallmsg() { \
 
 maininstall() { # Installs all needed programs from main repo.
 	dialog --title "LARBS Installation" --infobox "Installing \`$1\` ($n of $total). $1 $2" 5 70
-	xbps-install -y "$1" >/dev/null 2>&1
+	pkg install -y "$1" >/dev/null 2>&1
 	}
 
 gitmakeinstall() {
@@ -60,6 +60,19 @@ pipinstall() { \
 	yes | pip install "$1"
 	}
 
+portupdate() { \
+	dialog --title "LARBS Installation" --infobox "Updating Ports Repository..." 5 70
+	portsnap fetch
+	portsnap extract
+	}
+
+portinstall() { \
+	dialog --title "LARBS Installation" --infobox "Installing Port \`$1\` ($n of $total). $1 $2" 5 70
+	cd /usr/ports/$1
+	export BATCH=yes
+	make install clean
+	}
+
 installationloop() { \
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) || curl -Ls "$progsfile" | sed '/^#/d' > /tmp/progs.csv
 	total=$(wc -l < /tmp/progs.csv)
@@ -69,7 +82,7 @@ installationloop() { \
 		case "$tag" in
 			"") maininstall "$program" "$comment" ;;
 			"G") gitmakeinstall "$program" "$comment" ;;
-			"P") pipinstall "$program" "$comment" ;;
+			"P") portinstall "$program" "$comment" ;;
 		esac
 	done < /tmp/progs.csv ;}
 
@@ -85,13 +98,9 @@ putgitrepo() { # Downlods a gitrepo $1 and places the files in $2 only overwriti
 
 serviceinit() { for service in "$@"; do
 	dialog --infobox "Enabling \"$service\"..." 4 40
-	ln -s "/etc/sv/$service" /var/service/
-	sv start "$service"
+	echo "${service}_enable=\"YES\"" >> /etc/rc.conf
+	service "$service" start
 	done ;}
-
-systembeepoff() { dialog --infobox "Getting rid of that retarded error beep sound..." 10 50
-	rmmod pcspkr
-	echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
 
 finalize(){ \
 	dialog --infobox "Preparing welcome message..." 4 50
@@ -104,7 +113,7 @@ finalize(){ \
 ### This is how everything happens in an intuitive format and order.
 
 # Check if user is root on Arch distro. Install dialog.
-xbps-install -Syu dialog
+pkg install -y dialog
 
 # Welcome user.
 welcomemsg || error "User exited."
@@ -118,7 +127,7 @@ preinstallmsg || error "User exited."
 ### The rest of the script requires no user input.
 
 dialog --title "LARBS Installation" --infobox "Installing \`basedevel\` and \`git\` for installing other software." 5 70
-xbps-install -y curl base-devel git >/dev/null 2>&1
+pkg install install -y curl base-devel git >/dev/null 2>&1
 
 # The command that does all the installing. Reads the progs.csv file and
 # installs each needed program the way required. Be sure to run this only after
@@ -133,8 +142,6 @@ rm -f "/home/$name/README.md" "/home/$name/LICENSE"
 # Enable services here.
 serviceinit alsa wpa_supplicant dbus
 
-# Most important command! Get rid of the beep!
-systembeepoff
 
 # Last message! Install complete!
 finalize
