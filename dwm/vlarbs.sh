@@ -115,6 +115,9 @@ finalize(){ \
 # Check if user is root on Arch distro. Install dialog.
 pkg install -y dialog
 
+# Update the ports repository
+portupdate
+
 # Welcome user.
 welcomemsg || error "User exited."
 
