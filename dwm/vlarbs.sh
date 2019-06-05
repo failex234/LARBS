@@ -62,8 +62,8 @@ pipinstall() { \
 
 portupdate() { \
 	dialog --title "LARBS Installation" --infobox "Updating Ports Repository..." 5 70
-	portsnap fetch
-	portsnap extract
+	portsnap fetch > /dev/null 2>&1
+	portsnap extract > /dev/null 2>&1
 	}
 
 portinstall() { \
