@@ -47,7 +47,7 @@ maininstall() { # Installs all needed programs from main repo.
 gitmakeinstall() {
 	repo="$(basename "$1")"
 	repodir="/home/$name/repos/$repo"
-	echo "Installing \`$(basename "$1"\` ($n of $total) via git and make. $(basename "$1") $2..."
+	echo "Installing \`$(basename "$1")\` ($n of $total) via git and make. $(basename "$1") $2..."
 	sudo -u "$name" mkdir -p "$repodir"
 	sudo -u "$name" git clone --depth 1 "$1" "/home/$name/repos/$repo" >/dev/null 2>&1
 	cd "$repodir" || exit
