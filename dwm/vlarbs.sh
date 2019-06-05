@@ -40,14 +40,14 @@ preinstallmsg() { \
 	}
 
 maininstall() { # Installs all needed programs from main repo.
-	dialog --title "LARBS Installation" --infobox "Installing \`$1\` ($n of $total). $1 $2" 5 70
+	echo "Installing '$1' ($n of $total). $1 $2..."
 	pkg install -y "$1" >/dev/null 2>&1
 	}
 
 gitmakeinstall() {
 	repo="$(basename "$1")"
 	repodir="/home/$name/repos/$repo"
-	dialog --title "LARBS Installation" --infobox "Installing \`$(basename "$1")\` ($n of $total) via \`git\` and \`make\`. $(basename "$1") $2" 5 70
+	echo "Installing \`$(basename "$1"\` ($n of $total) via git and make. $(basename "$1") $2..."
 	sudo -u "$name" mkdir -p "$repodir"
 	sudo -u "$name" git clone --depth 1 "$1" "/home/$name/repos/$repo" >/dev/null 2>&1
 	cd "$repodir" || exit
@@ -61,16 +61,17 @@ pipinstall() { \
 	}
 
 portupdate() { \
-	dialog --title "LARBS Installation" --infobox "Updating Ports Repository..." 5 70
+	echo "Updating ports repository..."
 	portsnap fetch > /dev/null 2>&1
 	portsnap extract > /dev/null 2>&1
 	}
 
 portinstall() { \
 	dialog --title "LARBS Installation" --infobox "Installing Port \`$1\` ($n of $total). $1 $2" 5 70
+	echo "Installing port '$1' ($n of $total) $1 $2..."
 	cd /usr/ports/$1
 	export BATCH=yes
-	make install clean
+	make install clean > /dev/null 2>&1
 	}
 
 installationloop() { \
@@ -88,7 +89,7 @@ installationloop() { \
 
 putgitrepo() { # Downlods a gitrepo $1 and places the files in $2 only overwriting conflicts
 	[ -z "$3" ] && branch="master" || branch="$repobranch"
-	dialog --infobox "Downloading and installing config files..." 4 60
+	echo "Downloading and installing config files..."
 	dir=$(mktemp -d)
 	[ ! -d "$2" ] && mkdir -p "$2" && chown -R "$name:wheel" "$2"
 	chown -R "$name:wheel" "$dir"
@@ -97,7 +98,7 @@ putgitrepo() { # Downlods a gitrepo $1 and places the files in $2 only overwriti
 	}
 
 serviceinit() { for service in "$@"; do
-	dialog --infobox "Enabling \"$service\"..." 4 40
+	echo "Enabling ${service}..."
 	echo "${service}_enable=\"YES\"" >> /etc/rc.conf
 	service "$service" start
 	done ;}
@@ -129,7 +130,7 @@ preinstallmsg || error "User exited."
 
 ### The rest of the script requires no user input.
 
-dialog --title "LARBS Installation" --infobox "Installing \`git\` for installing other software." 5 70
+echo "Installing git and curl..."
 pkg install -y curl git >/dev/null 2>&1
 
 # The command that does all the installing. Reads the progs.csv file and
