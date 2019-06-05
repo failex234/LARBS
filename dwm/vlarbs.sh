@@ -129,8 +129,8 @@ preinstallmsg || error "User exited."
 
 ### The rest of the script requires no user input.
 
-dialog --title "LARBS Installation" --infobox "Installing \`basedevel\` and \`git\` for installing other software." 5 70
-pkg install install -y curl base-devel git >/dev/null 2>&1
+dialog --title "LARBS Installation" --infobox "Installing \`git\` for installing other software." 5 70
+pkg install -y curl git >/dev/null 2>&1
 
 # The command that does all the installing. Reads the progs.csv file and
 # installs each needed program the way required. Be sure to run this only after
